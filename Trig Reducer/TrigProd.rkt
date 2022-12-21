@@ -1,5 +1,5 @@
 #lang racket
-(provide list-trieify trie-listify trig-add trig-sub trig-mul trig-exp make-tp tp)
+(provide list-trieify trie-listify trig-add trig-sub trig-mul trig-exp trie-invert make-tp tp tp-coeff tp-sin-deg tp-cos-deg)
 ;Basic addition and multiplication with trig expressions of form x * sinθ^n * cosθ^m
 
 (define-struct tp (coeff sin-deg cos-deg) #:transparent)
