@@ -51,15 +51,16 @@ and could definetly need some help when it comes to user experience, but it work
 
 <h4>Functionality</h4>
 <list>
-  <li>(Planned) Can take negative input like sin -4θ</li>
+  <li>Can take negative input like sin -4θ</li>
   <li>(Planned) Uses Dynamic Programming for Recursive Solving</li>
-  <li>(Alternative Reality Plans) Uses DMT to forgo Recursion</li>
+  <li>Wanna know what sin 1000θ is?</li>
   <li>Basic Trig Algebra System</li>
 </list>
 <h4>Anti-Functionality</h4>
 <list>
   <li>Not a FULL algebra system and will probably scream when not fed a single expression</li>
   <li>Does not know what the Pythagorean Identity is</li>
+  <li>Why would you use this</li>
 </list>
 <h4>Things Used</h4>
 <list><li>Racket</li></list>
