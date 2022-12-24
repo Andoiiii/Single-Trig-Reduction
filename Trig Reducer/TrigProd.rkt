@@ -1,62 +1,56 @@
 #lang racket
-(provide list-trieify trie-listify trig-add trig-sub trig-mul trig-exp trie-invert make-tp tp tp-coeff tp-sin-deg tp-cos-deg)
+(provide tp-+ tp-- tp-* tp-exp tp-print make-tp tp tp-coeff tp-sin-deg tp-cos-deg)
 ;Basic addition and multiplication with trig expressions of form x * sinθ^n * cosθ^m
 
 (define-struct tp (coeff sin-deg cos-deg) #:transparent)
-(define-struct node (sin coeff cos) #:transparent)
 
-(define (trie-insert e t) ;insert a trigprod into the trie
-    (trie-prune (cond
-        [(empty? t) (trie-insert e (make-node empty 0 empty))]
-        [(and (zero? (tp-sin-deg e)) (zero? (tp-cos-deg e))) 
-            (make-node (node-sin t) (+ (tp-coeff e) (node-coeff t)) (node-cos t))]
-        [(zero? (tp-sin-deg e)) 
-            (make-node (node-sin t) (node-coeff t) 
-            (trie-insert (make-tp (tp-coeff e) (tp-sin-deg e) (- (tp-cos-deg e) 1)) (node-cos t)))]
-        [#t 
-            (make-node (trie-insert (make-tp (tp-coeff e) (- (tp-sin-deg e) 1) (tp-cos-deg e)) (node-sin t)) 
-            (node-coeff t) (node-cos t))]
-        ))
-)
-
-(define (trie-listify t) ;takes a trie and flattens it into a list of trigprods
-    (define (actual-list t s c acc)
-        (cond
-            [(empty? t) acc]
-            [(not (zero? (node-coeff t))) 
-                (actual-list (node-sin t) (+ s 1) c (cons (make-tp (node-coeff t) s c) (actual-list (node-cos t) s (+ c 1) acc)))]
-            [#t (actual-list (node-sin t) (+ s 1) c (actual-list (node-cos t) s (+ c 1) acc))]
-        ))
-    (actual-list t 0 0 empty)
-)
-(define (list-trieify lst) ;convert a list of trig-prods into a trie
-    (foldl trie-insert empty lst))
-
-(define (trie-prune t)
-    (if (and (node? t) (zero? (node-coeff t)) (empty? (node-sin t)) (empty? (node-cos t))) empty t))
-
-(define (trie-invert t)
+(define (tp-< a b) ;less than for 2 trigprods
     (cond
-        [(empty? t) empty]
-        [#t (make-node (trie-invert (node-sin t)) (- 0 (node-coeff t)) (trie-invert (node-cos t)))]))
+        [(< (tp-sin-deg a) (tp-sin-deg b)) #t]
+        [(> (tp-sin-deg a) (tp-sin-deg b)) #f]
+        [(< (tp-cos-deg a) (tp-cos-deg b)) #t]
+        [#t #f]))
+(define (tp-= a b) (and (not (tp-< a b)) (not (tp-< b a))))
 
-(define (trie-mul t tprod) ;makes most sense to listify, do the product, then remake the trie...
-    (list-trieify (foldl (λ(x acc) 
-            (cons (make-tp (* (tp-coeff x) (tp-coeff tprod)) 
-                           (+ (tp-sin-deg x) (tp-sin-deg tprod)) 
-                           (+ (tp-cos-deg x) (tp-cos-deg tprod))) acc))
-            empty (trie-listify t))))
-    
-(define (trig-add t1 t2) ;add together 2 TRIEs of TrigProds, returns as a Trie
-    (foldl (λ(x acc) (trie-insert x acc)) t1 (trie-listify t2)))
-(define (trig-sub t1 t2) ;subtract t1 - t2, returning a trie at the end
-    (foldl trie-insert t1 (trie-listify (trie-invert t2))))
-(define (trig-mul t1 t2) ;takes 2 tries and multiplies them together... this nessecitates foiling =listify
-    (foldl trig-add empty (foldl (λ(x acc) (cons (trie-mul t2 x) acc)) empty (trie-listify t1))))
-(define (trig-exp t1 n)
+(define (tp-de-0 lst) ;remove all terms with coefficent 0
+    (cond
+        [(empty? lst) empty]
+        [(= 0 (tp-coeff (car lst))) (tp-de-0 (cdr lst))]
+        [#t (cons (car lst) (tp-de-0 (cdr lst)))]))
+
+(define (add1-tp e lst) ;adds 1 TrigProd into a list of them, maintains total order
+    (cond
+        [(empty? lst) (cons e empty)]
+        [(tp-= e (car lst)) (cons (make-tp (+ (tp-coeff e) (tp-coeff (car lst))) (tp-sin-deg e) (tp-cos-deg e)) (cdr lst))]
+        [(tp-< e (car lst)) (cons e lst)]
+        [#t (cons (car lst) (add1-tp e (cdr lst)))]
+        ))
+(define (tp-+ a b) (tp-de-0 (foldl (λ(x acc) (add1-tp x acc)) b a)))
+
+(define (negate-tp a) (map (λ(x) (make-tp (- 0 (tp-coeff x)) (tp-sin-deg x) (tp-cos-deg x))) a))
+(define (tp-- a b) (tp-de-0 (tp-+ a (negate-tp b))))
+
+(define (mul-tp e b) (map (λ(x) (make-tp (* (tp-coeff e) (tp-coeff x)) (+ (tp-sin-deg e) (tp-sin-deg x)) (+ (tp-cos-deg e) (tp-cos-deg x)))) b))
+(define (tp-* a b) (tp-de-0 (foldl tp-+ empty (foldl (λ(x acc) (cons (mul-tp x b) acc)) empty a))))
+
+(define (tp-exp t1 n)
     (define (recursor t1 n acc)
       (cond
             [(= n 0) acc] ;return ... 1?
-            [#t (recursor t1 (- n 1) (trig-mul t1 acc))]
+            [#t (recursor t1 (- n 1) (tp-* t1 acc))]
       ))
-    (recursor t1 n (list-trieify (list (tp 1 0 0)))))
+    (tp-de-0 (recursor t1 n (list (tp 1 0 0)))))
+
+(define (pipe val flist) (foldl (λ(x acc) (x acc)) val flist))
+(define (print-single-tp a)
+    (define (add-plus a) (cond [(< 0 (tp-coeff a)) (printf "+") a][#t a]))
+    (define (print-coeff a) (printf "~a" (tp-coeff a)) a)
+    (define (add-sine a) (cond [(not (= 0 (tp-sin-deg a))) (printf "*sin") a][#t a]))
+    (define (add-sexp a) (cond [(<= (tp-sin-deg a) 1) a][#t (printf "^~a" (tp-sin-deg a)) a]))
+    (define (add-x-s a) (cond [(not (= 0 (tp-sin-deg a))) (printf "x") a][#t a]))
+    (define (add-x-c a) (cond [(not (= 0 (tp-cos-deg a))) (printf "x") a][#t a]))
+    (define (add-cosn a) (cond [(not (= 0 (tp-cos-deg a))) (printf "*cos") a][#t a]))
+    (define (add-cexp a) (cond [(<= (tp-cos-deg a) 1) a][#t (printf "^~a" (tp-cos-deg a)) a]))
+    (define (closer a) (printf "\n"))
+    (pipe a (list add-plus print-coeff add-sine add-sexp add-x-s add-cosn add-cexp add-x-c closer)))
+(define (tp-print a) (if (empty? a) (printf "0") (foldl (λ(x acc) (print-single-tp x)) 'rawruwu a)))
