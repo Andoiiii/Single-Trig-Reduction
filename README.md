@@ -47,18 +47,19 @@ and could definetly need some help when it comes to user experience, but it work
 
 <h3>Single Trigonometric Expression Reducer</h3>
 <p>Given an expression like sin 4θ, whats an equivalent equation expressed in only sin θ and cos θ terms? This should help.</p>
+<p>This is a technically a story on how Complex Numbers are Super good for this specific problem, thanks DeMoivres</p>
 <p>WORK IN PROGRESS</p>
 
 <h4>Functionality</h4>
 <list>
   <li>Can take negative input like sin -4θ</li>
-  <li>(Planned) Uses Dynamic Programming for Recursive Solving</li>
-  <li>Wanna know what sin 1000θ is?</li>
+  <li>Uses Memoization for Recursive Solving</li>
+  <li>Takes 11 seconds to compute what sin 1000x is</li>
   <li>Basic Trig Algebra System</li>
 </list>
 <h4>Anti-Functionality</h4>
 <list>
-  <li>Not a FULL algebra system and will probably scream when not fed a single expression</li>
+  <li>Glorified Pascal's Triangle Calculator</li>
   <li>Does not know what the Pythagorean Identity is</li>
   <li>Why would you use this</li>
 </list>
