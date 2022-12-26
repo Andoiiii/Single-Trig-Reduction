@@ -46,22 +46,21 @@ and could definetly need some help when it comes to user experience, but it work
 <list><li>Python</li></list>
 
 <h3>Single Trigonometric Expression Reducer</h3>
-<p>Given an expression like sin 4θ, whats an equivalent equation expressed in only sin θ and cos θ terms? This should help.</p>
-<p>This is a technically a story on how Complex Numbers are Super good for this specific problem, thanks DeMoivres</p>
-<p>WORK IN PROGRESS</p>
+Given an expression like sin 4θ, whats an equivalent equation expressed in only sin θ and cos θ terms? This should help. Simply type
+`(sin-reduce n)` or `(cos-reduce n)`, which will cause the program to return the corresponding expression, in a somewhat? legible format.
 
 <h4>Functionality</h4>
 <list>
   <li>Can take negative input like sin -4θ</li>
-  <li>Uses Memoization for Recursive Solving</li>
-  <li>Takes 11 seconds to compute what sin 1000x is</li>
+  <li>2 Different Ways to solve the program - Memoization (in `RecursiveReducer.rkt') or by applying DeMoivre's Formula (in `DMTReducer.rkt`). </li>
+  <li>One is significantly faster than the other - try give it sin 10000x</li>
   <li>Basic Trig Algebra System</li>
 </list>
 <h4>Anti-Functionality</h4>
 <list>
-  <li>Glorified Pascal's Triangle Calculator</li>
+  <li>Glorified Pascal's Triangle Calculator, thanks DeMoivres</li>
   <li>Does not know what the Pythagorean Identity is</li>
-  <li>Why would you use this</li>
+  <li>Why do you want sin 10000x?</li>
 </list>
 <h4>Things Used</h4>
 <list><li>Racket</li></list>
