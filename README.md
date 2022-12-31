@@ -1,6 +1,6 @@
 # Andoiii's Tinier Projects 🐲
 
-A collection of one-off thingys that aren't big enough to realllyy have its own repository. In other words, a collection of week-old, super niche, uer-unfriendly programs.
+A collection of one-off thingys that aren't big enough to realllyy have its own repository. In other words, a collection of week-old, super niche, user-unfriendly programs.
 
 ## Projects List
 
